@@ -51,10 +51,10 @@ class Tester:
 		
 		if self.isVariational:
 			reconstruction, mu, logvar = self.test_model(images)
-			loss, bce, kld = self.loss_function(images, reconstruction, mu, logvar)
+			loss, components = self.loss_function(images, reconstruction, mu, logvar)
 		elif self.isContractive:
 			reconstruction, encoding = self.test_model(images)
-			loss = self.loss_function(images, reconstruction, encoding, self.test_model.encoder[-1][0].weight)
+			loss, components = self.loss_function(images, reconstruction, encoding, self.test_model.encoder[-1][0].weight)
 		else:
 			reconstruction, encoding = self.test_model(images)
 			loss = self.loss_function(images, reconstruction)

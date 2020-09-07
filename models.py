@@ -38,6 +38,7 @@ class Qiang_AutoEncoder(nn.Module):
 	'''
 	def __init__(self):
 		super(Qiang_AutoEncoder, self).__init__()
+		# print(self)
 		self.encoder = nn.Sequential(
 			nn.Conv2d(Config.channels, Config.ImageSize, 4, 4, 0, bias=False),
 			nn.LeakyReLU(0.2, inplace=True),
@@ -76,6 +77,7 @@ class AE_v0(nn.Module):
 	'''
 	def __init__(self, full = False):
 		super(AE_v0, self).__init__()
+		# print(self)
 		self.filter_count = [64, 128, 256, 512]
 
 		self.encoder = nn.Sequential(
@@ -105,6 +107,7 @@ class AE_v1(nn.Module):
 	'''
 	def __init__(self):
 		super(AE_v1, self).__init__()
+		# print(self)
 		self.filter_count = [64, 128, 256, 512]
 
 		self.encoder = nn.Sequential(
@@ -134,6 +137,7 @@ class AE(nn.Module):
 	'''
 	def __init__(self, full = False):
 		super(AE, self).__init__()
+		# print(self)
 		self.filter_count = [64, 128, 256, 512]
 
 		self.encoder = nn.Sequential(
@@ -157,34 +161,7 @@ class AE(nn.Module):
 		encoding = self.encoder(inp)
 		reconstruction = self.decoder(encoding)
 		return reconstruction, encoding
-	
-# Variatonal
-class VAE(AE):
-	def __init__(self):
-		super(VAE, self).__init__()
-		self.parameter_size = Config.EmbeddingSize
-		self.mean_fc = nn.Linear(Config.EmbeddingSize, self.parameter_size)
-		self.var_fc = nn.Linear(Config.EmbeddingSize, self.parameter_size)
-	
-	def encode(self, x):
-		e = self.encoder(x).view(-1, Config.EmbeddingSize)
-		mean = nn.ReLU()(self.mean_fc(e))
-		var = nn.ReLU()(self.var_fc(e))
-		return mean, var
-	
-	def decode(self, encoding):
-		return self.decoder(encoding.view(-1, Config.EmbeddingSize, 1, 1))
-	
-	def reparameterize(self, mu, logvar):
-		std = torch.exp(0.5*logvar)
-		eps = torch.randn_like(std)
-		return mu + eps*std
 
-	def forward(self, x):
-		mu, logvar = self.encode(x)
-		z = self.reparameterize(mu, logvar)
-		return self.decode(z), mu, logvar
-	
 # Contractive
 # Derive Base Encoder and use the same
 
@@ -249,6 +226,7 @@ class ADB(nn.Module):
 class KS_AE_v0(AE):
 	def __init__(self, normalDecoder = False):
 		super(KS_AE_v0, self).__init__()
+		# print(self)
 		self.filter_count = [64, 64, 128, 256]
 
 		self.encoder = nn.Sequential(
@@ -276,6 +254,7 @@ class KS_AE_v0(AE):
 class KS_AE(AE):
 	def __init__(self, normalDecoder = False):
 		super(KS_AE, self).__init__()
+		# print(self)
 		self.filter_count = [64, 64, 128, 256]
 
 		self.encoder = nn.Sequential(
@@ -300,6 +279,62 @@ class KS_AE(AE):
 		encoding = self.encoder(x)
 		reconstruction = self.decoder(encoding)
 		return reconstruction, encoding
+
+# Variatonal
+class VAE(AE):
+	def __init__(self):
+		super(VAE, self).__init__()
+		# print(self)
+		self.parameter_size = Config.EmbeddingSize
+		self.mean_fc = nn.Linear(Config.EmbeddingSize, self.parameter_size)
+		self.var_fc = nn.Linear(Config.EmbeddingSize, self.parameter_size)
 	
+	def encode(self, x):
+		e = self.encoder(x).view(-1, Config.EmbeddingSize)
+		mean = nn.ReLU()(self.mean_fc(e))
+		var = nn.ReLU()(self.var_fc(e))
+		return mean, var
+	
+	def decode(self, encoding):
+		return self.decoder(encoding.view(-1, Config.EmbeddingSize, 1, 1))
+	
+	def reparameterize(self, mu, logvar):
+		std = torch.exp(0.5*logvar)
+		eps = torch.randn_like(std)
+		return mu + eps*std
+
+	def forward(self, x):
+		mu, logvar = self.encode(x)
+		z = self.reparameterize(mu, logvar)
+		return self.decode(z), mu, logvar
+
+# Variatonal
+class KS_VAE(KS_AE):
+	def __init__(self):
+		super(KS_VAE, self).__init__()
+		# print(self)
+		self.parameter_size = Config.EmbeddingSize
+		self.mean_fc = nn.Linear(Config.EmbeddingSize, self.parameter_size)
+		self.var_fc = nn.Linear(Config.EmbeddingSize, self.parameter_size)
+	
+	def encode(self, x):
+		e = self.encoder(x).view(-1, Config.EmbeddingSize)
+		mean = nn.ReLU()(self.mean_fc(e))
+		var = nn.ReLU()(self.var_fc(e))
+		return mean, var
+	
+	def decode(self, encoding):
+		return self.decoder(encoding.view(-1, Config.EmbeddingSize, 1, 1))
+	
+	def reparameterize(self, mu, logvar):
+		std = torch.exp(0.5*logvar)
+		eps = torch.randn_like(std)
+		return mu + eps*std
+
+	def forward(self, x):
+		mu, logvar = self.encode(x)
+		z = self.reparameterize(mu, logvar)
+		return self.decode(z), mu, logvar
+
 # Split
 # Neo

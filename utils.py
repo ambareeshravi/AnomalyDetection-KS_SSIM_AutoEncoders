@@ -62,12 +62,14 @@ def selectModel(model_type):
 	elif "mssim" in model_type: loss_function = MS_SSIM_LOSS(data_range=1.0, size_average=True, channel=3)
 	elif "sim" in model_type: loss_function = SSIM_LOSS(data_range=1.0, size_average=True, channel=3)
 	elif "weight" in model_type: loss_function = WEIGHTED_SIMILARITY()
+	elif "contractive" in model_type: loss_function = CONTRACTIVE_LOSS()
 	else: loss_function = MSE_LOSS()
 		
-	if "base" in model_type: return AE(), loss_function
+	if "variational" in model_type:
+		if "base" in model_type: return VAE(), VARIATIONAL_LOSS()
+		elif "kernel" in model_type: return KS_VAE(), VARIATIONAL_LOSS()
+	elif "base" in model_type: return AE(), loss_function
 	elif "q" in model_type: return Qiang_AutoEncoder(), loss_function
-	elif "contractive" in model_type: return AE(), CONTRACTIVE_LOSS()
-	elif "variational" in model_type: return VAE(), VARIATIONAL_LOSS()
 	elif "kernel" in model_type: return KS_AE(), loss_function
 	else: raise TypeError("[ERROR]: Incorrect Model Type")
 
@@ -84,6 +86,7 @@ def selectData(dataset_type = "HAM10000", batch_size = 64):
 	'''
 	dataset_type = dataset_type.lower()
 	if "ham" in dataset_type: return HAM10000_Dataset(batch_size = batch_size)
+	elif "distraction" in dataset_type: return DISTRACTION_Dataset(batch_size = batch_size)
 	else: raise TypeError("[ERROR]: Incorrect Dataset Type")
 		
 def getNParams(model):

@@ -27,9 +27,9 @@ class BCE_LOSS:
 		return self.loss(reconstructions, original)
 
 class CONTRACTIVE_LOSS:
-	def __init__(self, primary_loss = "mse", lamda = 1e-3):
+	def __init__(self, primary_loss = "mse", lamda = 1):
 		# print("CONT +", primary_loss)
-		self.main_loss = MSE_LOSS(reduction = "mean")
+		self.main_loss = MSE_LOSS(reduction = "sum")
 		if "bce" in primary_loss: self.main_loss = BCE_LOSS(reduction = "mean")
 		self.lamda = lamda
 	
@@ -38,7 +38,7 @@ class CONTRACTIVE_LOSS:
 		W = W.view(Config.EmbeddingSize, -1)
 		dh = (encodings * (1 - encodings)).view(-1, Config.EmbeddingSize).to(Config.device)
 		contractive_loss = self.lamda * torch.sum(dh**2 * torch.sum(W**2, dim=-1)).to(Config.device)
-		return main_loss + contractive_loss
+		return main_loss + contractive_loss, {"MSE": main_loss, "CE": contractive_loss}
 
 class VARIATIONAL_LOSS:
 	def __init__(self):
@@ -48,7 +48,7 @@ class VARIATIONAL_LOSS:
 	def __call__(self, original, reconstructions, mu, logvar):
 		BCE = self.bce_loss(original, reconstructions)
 		KLD = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp())
-		return BCE + KLD, BCE, KLD
+		return BCE + KLD, {"BCE": BCE, "KLD": KLD}
 
 class MS_SSIM_LOSS(MS_SSIM):
 	def forward(self, img1, img2):

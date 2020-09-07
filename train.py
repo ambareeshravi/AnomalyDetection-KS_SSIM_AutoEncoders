@@ -75,10 +75,12 @@ class Trainer:
 		
 		if self.isVariational:
 			reconstruction, mu, logvar = self.model(images)
-			loss, bce, kld = self.loss_function(images, reconstruction, mu, logvar)
+			loss, components = self.loss_function(images, reconstruction, mu, logvar)
+# 			print(components)
 		elif self.isContractive:
 			reconstruction, encoding = self.model(images)
-			loss = self.loss_function(images, reconstruction, encoding, self.model.encoder[-1][0].weight)
+			loss, components = self.loss_function(images, reconstruction, encoding, self.model.encoder[-1][0].weight)
+# 			print(components)
 		else:
 			reconstruction, encoding = self.model(images)
 			loss = self.loss_function(images, reconstruction)
@@ -177,6 +179,8 @@ class Trainer:
 		except Exception as e:
 			print("Could not clear the memory. Kill the process manually.")
 			print(e)
+			
+		return self.save_folder
     
 if __name__ == "__main__":
 	import argparse

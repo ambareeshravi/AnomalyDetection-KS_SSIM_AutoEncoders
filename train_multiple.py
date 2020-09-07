@@ -166,7 +166,7 @@ class Trainer:
 		else: model.eval()
 		
 		reconstruction, encoding = model(images)
-		loss = loss_function(images, reconstruction, encoding, model.encoder[-1][0].weight)
+		loss, components = loss_function(images, reconstruction, encoding, model.encoder[-1][0].weight)
 		if isTrain:
 			loss.backward()
 			optimizer.step()
@@ -182,7 +182,7 @@ class Trainer:
 		else: model.eval()
 			
 		reconstruction, mu, logvar = model(images)
-		loss, bce, kld = loss_function(images, reconstruction, mu, logvar)
+		loss, components = loss_function(images, reconstruction, mu, logvar)
 			
 		if isTrain:
 			loss.backward()
