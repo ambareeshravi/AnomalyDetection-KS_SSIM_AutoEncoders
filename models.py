@@ -337,4 +337,103 @@ class KS_VAE(KS_AE):
 		return self.decode(z), mu, logvar
 
 # Split
-# Neo
+def BN_R(n, p = 0.2):
+	'''
+	Activation Block: ReLU(BN(x))
+
+	Args:
+		n - number of output channels as <int>
+		p - probability of dropout as <float>
+	Returns:
+		<nn.Sequential> block
+	'''
+	return nn.Sequential(
+		nn.BatchNorm2d(n), #, momentum = None, track_running_stats = False),
+		nn.ReLU6(inplace = True), # Found ReLU6 to be performing better thatn ReLU (Improvement)
+		nn.Dropout2d(p) # Slows down training but better generalization (Improvement)
+	)
+
+class SM_AE(AE):
+	def __init__(self, normalDecoder = False, ngpu = 1):
+		super(SM_AE, self).__init__()
+		self.ngpu = ngpu
+
+		self.filter_count = [64, 128, 256, 512]
+
+		# Encoder Layers
+		# SM Block 1
+		self.lconv1 = nn.Conv2d(Config.channels, self.filter_count[0], 3, 2)
+		self.rconv1 = nn.Conv2d(Config.channels, self.filter_count[0], 4, 2)
+		self.act_block1 = nn.ReLU(self.filter_count[0])
+
+		# SM Block 2
+		self.lconv2 = nn.Conv2d(self.filter_count[0], self.filter_count[1], 3, 2)
+		self.rconv2 = nn.Conv2d(self.filter_count[0], self.filter_count[1], 4, 2, padding_mode='replicate', padding=1)
+		self.act_block2 = BN_R(self.filter_count[1])
+
+		# SM Block 3
+		self.lconv3 = nn.Conv2d(self.filter_count[1], self.filter_count[2], 4, 3)
+		self.rconv3 = nn.Conv2d(self.filter_count[1], self.filter_count[2], 5, 3, padding_mode='replicate', padding=1)
+		self.act_block3 = BN_R(self.filter_count[2])
+
+		# SM Block 4
+		self.lconv4 = nn.Conv2d(self.filter_count[2], self.filter_count[3], 4, 3)
+		self.rconv4 = nn.Conv2d(self.filter_count[2], self.filter_count[3], 5, 3, padding_mode='replicate', padding=1)
+		self.act_block4 = BN_R(self.filter_count[3])
+
+		# SM Block 5
+		self.lconv5 = nn.Conv2d(self.filter_count[3], Config.EmbeddingSize, 3, 2)
+		self.rconv5 = nn.Conv2d(self.filter_count[3], Config.EmbeddingSize, 4, 2, padding_mode='replicate', padding=1)	
+		self.act_block5 = nn.Sigmoid()
+
+		# Decoder layers
+		# SM Block 6
+		self.ltconv1 = nn.ConvTranspose2d(Config.EmbeddingSize, self.filter_count[-1], 3, 2, output_padding = 1)
+		self.rtconv1 = nn.ConvTranspose2d(Config.EmbeddingSize, self.filter_count[-1], 4, 2)
+		self.act_block6 = BN_R(self.filter_count[-1])
+
+		# SM Block 7
+		self.ltconv2 = nn.ConvTranspose2d(self.filter_count[-1], self.filter_count[-2], 4, 3, output_padding = 1)
+		self.rtconv2 = nn.ConvTranspose2d(self.filter_count[-1], self.filter_count[-2], 5, 3)
+		self.act_block7 = BN_R(self.filter_count[-2])
+
+		# SM Block 8
+		self.ltconv3 = nn.ConvTranspose2d(self.filter_count[-2], self.filter_count[-3], 4, 2, output_padding = 1)
+		self.rtconv3 = nn.ConvTranspose2d(self.filter_count[-2], self.filter_count[-3], 5, 2)
+		self.act_block8 = BN_R(self.filter_count[-3])
+
+		# SM Block 9
+		self.ltconv4 = nn.ConvTranspose2d(self.filter_count[-3], self.filter_count[-4], 3, 2, output_padding = 1)
+		self.rtconv4 = nn.ConvTranspose2d(self.filter_count[-3], self.filter_count[-4], 4, 2)
+		self.act_block9 = BN_R(self.filter_count[-4])
+
+		# SM Block 9
+		self.ltconv5 = nn.ConvTranspose2d(self.filter_count[-4], Config.channels, 4, 2, padding = 1)
+		self.act_block10 = nn.Sequential(
+			nn.BatchNorm2d(Config.channels),
+			nn.Sigmoid()
+		)
+
+		if not normalDecoder: self.decoder_fn = self.sm_decoder
+		else: self.decoder_fn = self.decoder
+
+	def encoder(self, x):
+		l1_a = self.act_block1((self.lconv1(x) + self.rconv1(x)))
+		l2_a = self.act_block2((self.lconv2(l1_a) + self.rconv2(l1_a)))
+		l3_a = self.act_block3((self.lconv3(l2_a) + self.rconv3(l2_a)))
+		l4_a = self.act_block4((self.lconv4(l3_a) + self.rconv4(l3_a)))
+		l5_a = self.act_block5((self.lconv5(l4_a) + self.rconv5(l4_a)))
+		return l5_a
+
+	def sm_decoder(self, x):
+		l6_a = self.act_block6(self.ltconv1(x) + self.rtconv1(x))
+		l7_a = self.act_block7(self.ltconv2(l6_a) + self.rtconv2(l6_a))
+		l8_a = self.act_block8(self.ltconv3(l7_a) + self.rtconv3(l7_a))
+		l9_a = self.act_block9(self.ltconv4(l8_a) + self.rtconv4(l8_a))
+		l10_a = self.act_block10(self.ltconv5(l9_a))
+		return l10_a
+
+	def forward(self, x):
+		encoding = self.encoder(x)
+		reconstruction = self.decoder_fn(encoding)
+		return reconstruction, encoding

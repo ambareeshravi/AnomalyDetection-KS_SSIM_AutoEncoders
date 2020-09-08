@@ -58,11 +58,11 @@ class Trainer:
 			plt.xlabel("Number of epochs")
 			plt.ylabel("Loss")
 			plt.title("Performance Curves of %s on %s dataset"%(model_type, dataset_type))
-			plt.savefig(os.path.join(save_path, "train_history.png"), dpi = 100, bbox_inches='tight')
+			plt.savefig(os.path.join(save_path, "train_history.png"), dpi = 300, bbox_inches='tight')
 			plt.clf()
-			x = plt.imread(os.path.join(save_path, "train_history.png"))
-			plt.axis('off')
-			plt.imshow(x)
+# 			x = plt.imread(os.path.join(save_path, "train_history.png"))
+# 			plt.axis('off')
+# 			plt.imshow(x)
 		except Exception as e:
 			print(e)
 

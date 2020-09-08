@@ -38,20 +38,20 @@ class HAM10000_Dataset:
 		split_point = int(len(train_dataset)*val_split)
 		train_dataset, val_dataset = torch.utils.data.random_split(train_dataset, [split_point, len(train_dataset) - split_point])
 		
-		train_dataloader = torch.utils.data.DataLoader(train_dataset, batch_size=self.batch_size, shuffle=True, pin_memory=True)
-		val_dataloader = torch.utils.data.DataLoader(val_dataset, batch_size=self.batch_size, shuffle=True, pin_memory=True)
+		train_dataloader = torch.utils.data.DataLoader(train_dataset, batch_size=self.batch_size, shuffle=True,  num_workers = 4, pin_memory=True)
+		val_dataloader = torch.utils.data.DataLoader(val_dataset, batch_size=self.batch_size, shuffle=True, num_workers = 4, pin_memory=True)
 
 		return train_dataset, train_dataloader, None, val_dataloader
 
 	def getTestData(self, test_batch_size = 100):
 		normal_test_dataset = dset.ImageFolder(root=os.path.join(self.data_path, "NORMAL_TEST"), transform = self.test_data_transform)
-		normal_test_dataloader = torch.utils.data.DataLoader(normal_test_dataset, batch_size = test_batch_size, shuffle=True, pin_memory=True)
+		normal_test_dataloader = torch.utils.data.DataLoader(normal_test_dataset, batch_size = test_batch_size, shuffle=True, num_workers = 4, pin_memory=True)
 		
 		abnormal_dataloaders = dict()
 		for folder in glob(os.path.join(self.data_path, "ABNORMAL/*")):
 			category = os.path.split(folder)[-1]
 			abnormal_test_dataset = dset.ImageFolder(root=folder, transform = self.test_data_transform)
-			abnormal_test_dataloader = torch.utils.data.DataLoader(abnormal_test_dataset, batch_size = test_batch_size, shuffle = True, pin_memory=True)
+			abnormal_test_dataloader = torch.utils.data.DataLoader(abnormal_test_dataset, batch_size = test_batch_size, shuffle = True, num_workers = 4, pin_memory=True)
 			abnormal_dataloaders[category] = abnormal_test_dataloader
 			
 		return normal_test_dataset, normal_test_dataloader, abnormal_dataloaders
@@ -62,7 +62,7 @@ class DISTRACTION_Dataset:
 		self.data_path = data_path
 		self.batch_size = batch_size
 		self.train_data_transform = transforms.Compose([        
-					transforms.RandomGrayscale(p = 0.25),
+					transforms.RandomGrayscale(p = 0.1),
 					transforms.RandomHorizontalFlip(p=0.25),
 					transforms.RandomRotation(10),
 					transforms.Resize(Config.ImageSize),
@@ -85,20 +85,20 @@ class DISTRACTION_Dataset:
 		split_point = int(len(train_dataset)*val_split)
 		train_dataset, val_dataset = torch.utils.data.random_split(train_dataset, [split_point, len(train_dataset) - split_point])
 		
-		train_dataloader = torch.utils.data.DataLoader(train_dataset, batch_size=self.batch_size, shuffle=True, pin_memory=True)
-		val_dataloader = torch.utils.data.DataLoader(val_dataset, batch_size=self.batch_size, shuffle=True, pin_memory=True)
+		train_dataloader = torch.utils.data.DataLoader(train_dataset, batch_size=self.batch_size, shuffle=True, num_workers = 4, pin_memory=True)
+		val_dataloader = torch.utils.data.DataLoader(val_dataset, batch_size=self.batch_size, shuffle=True, num_workers = 4, pin_memory=True)
 
 		return train_dataset, train_dataloader, None, val_dataloader
 
 	def getTestData(self, test_batch_size = 100):
 		normal_test_dataset = dset.ImageFolder(root=os.path.join(self.data_path, "NORMAL_TEST"), transform = self.test_data_transform)
-		normal_test_dataloader = torch.utils.data.DataLoader(normal_test_dataset, batch_size = test_batch_size, shuffle=True, pin_memory=True)
+		normal_test_dataloader = torch.utils.data.DataLoader(normal_test_dataset, batch_size = test_batch_size, shuffle=True, num_workers = 4, pin_memory=True)
 		
 		abnormal_dataloaders = dict()
 		for folder in glob(os.path.join(self.data_path, "ABNORMAL/*")):
 			category = os.path.split(folder)[-1]
 			abnormal_test_dataset = dset.ImageFolder(root=folder, transform = self.test_data_transform)
-			abnormal_test_dataloader = torch.utils.data.DataLoader(abnormal_test_dataset, batch_size = test_batch_size, shuffle = True, pin_memory=True)
+			abnormal_test_dataloader = torch.utils.data.DataLoader(abnormal_test_dataset, batch_size = test_batch_size, shuffle = True, num_workers = 4, pin_memory=True)
 			abnormal_dataloaders[category] = abnormal_test_dataloader
 			
 		return normal_test_dataset, normal_test_dataloader, abnormal_dataloaders

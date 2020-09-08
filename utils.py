@@ -71,6 +71,7 @@ def selectModel(model_type):
 	elif "base" in model_type: return AE(), loss_function
 	elif "q" in model_type: return Qiang_AutoEncoder(), loss_function
 	elif "kernel" in model_type: return KS_AE(), loss_function
+	elif "split" in model_type: return SM_AE(), loss_function
 	else: raise TypeError("[ERROR]: Incorrect Model Type")
 
 def selectData(dataset_type = "HAM10000", batch_size = 64):

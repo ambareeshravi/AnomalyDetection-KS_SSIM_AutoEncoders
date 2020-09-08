@@ -65,7 +65,7 @@ class Tester:
 			
 		return loss.item()
 
-	def test(self, model_dir, dataset_type = "HAM10000", test_run = 10, save_random_recons = True):
+	def test(self, model_dir, test_run = 10, save_random_recons = True):
 		'''
 		Tests the given model untrained normal images and random abnormal images
 		'''
