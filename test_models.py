@@ -33,8 +33,8 @@ from weights_init import weights_init
 
 from sklearn.metrics import roc_auc_score
 
-np.random.seed(0)
-torch.manual_seed(0)
+# np.random.seed(0)
+# torch.manual_seed(0)
 
 class Tester:
 	def __init__(self, dataset_type = "HAM10000", batch_size = 100, n_images = 5):
@@ -43,6 +43,8 @@ class Tester:
 		self.n_images = n_images
 	
 	def save_reconstruction(self, image, recons, file_name = "", isNormal = True):
+		if isNormal: isNormal = "normal"
+		else: isNormal = "abnormal"
 		vutils.save_image(recons.detach(), file_name + "_" + str(isNormal) + "_recons.jpg", normalize=True)
 		vutils.save_image(image.detach(), file_name + "_" + str(isNormal) + "_original.jpg", normalize=True)
 

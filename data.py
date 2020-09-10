@@ -63,7 +63,7 @@ class DISTRACTION_Dataset:
 		self.batch_size = batch_size
 		self.train_data_transform = transforms.Compose([        
 					transforms.RandomGrayscale(p = 0.1),
-					transforms.RandomHorizontalFlip(p=0.25),
+					transforms.RandomHorizontalFlip(p=0.05),
 					transforms.RandomRotation(10),
 					transforms.Resize(Config.ImageSize),
 					transforms.CenterCrop(Config.ImageSize),
@@ -95,7 +95,7 @@ class DISTRACTION_Dataset:
 		normal_test_dataloader = torch.utils.data.DataLoader(normal_test_dataset, batch_size = test_batch_size, shuffle=True, num_workers = 4, pin_memory=True)
 		
 		abnormal_dataloaders = dict()
-		for folder in glob(os.path.join(self.data_path, "ABNORMAL/*")):
+		for folder in glob(os.path.join(self.data_path, "ABNORMAL_TEST/*")):
 			category = os.path.split(folder)[-1]
 			abnormal_test_dataset = dset.ImageFolder(root=folder, transform = self.test_data_transform)
 			abnormal_test_dataloader = torch.utils.data.DataLoader(abnormal_test_dataset, batch_size = test_batch_size, shuffle = True, num_workers = 4, pin_memory=True)

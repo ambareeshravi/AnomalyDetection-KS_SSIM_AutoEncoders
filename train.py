@@ -81,6 +81,9 @@ class Trainer:
 			reconstruction, encoding = self.model(images)
 			loss, components = self.loss_function(images, reconstruction, encoding, self.model.encoder[-1][0].weight)
 # 			print(components)
+		elif self.isManifold:
+			reconstruction, encoding = self.model(images)
+			loss = self.loss_function(images, reconstruction, encoding.view(-1, Config.EmbeddingSize))
 		else:
 			reconstruction, encoding = self.model(images)
 			loss = self.loss_function(images, reconstruction)
@@ -122,9 +125,10 @@ class Trainer:
 		if debug: print("Data Loaded")
 
 		# Prepare model
-		self.isVariational, self.isContractive = False, False
+		self.isVariational, self.isContractive, self.isManifold = False, False, False
 		if "variational" in model_type.lower(): self.isVariational = True
 		if "contractive" in model_type.lower(): self.isContractive = True
+		if "manifold" in model_type.lower(): self.isManifold = True
 		self.model, self.loss_function = selectModel(model_type)
 		if init_weights: self.model.apply(weights_init)
 		if pretrained_model: load_model(self.model, pretrained_model)
