@@ -26,7 +26,7 @@ class BCE_LOSS:
 		return self.loss(reconstructions, original)
 
 class CONTRACTIVE_LOSS:
-	def __init__(self, primary_loss = "mse", lamda = 1e-6):
+	def __init__(self, primary_loss = "mse", lamda = 1e-3):
 		# print("CONT +", primary_loss)
 		self.main_loss = MSE_LOSS(reduction = "mean")
 		if "bce" in primary_loss: self.main_loss = BCE_LOSS(reduction = "mean")
@@ -50,14 +50,6 @@ class VARIATIONAL_LOSS:
 		BCE = self.bce_loss(original, reconstructions)
 		KLD = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp())
 		return BCE + KLD, {"BCE": BCE, "KLD": KLD}
-
-class MS_SSIM_LOSS(MS_SSIM):
-	def forward(self, img1, img2):
-		return 100*( 1 - super(MS_SSIM_LOSS, self).forward(img1, img2))
-
-class SSIM_LOSS(SSIM):
-	def forward(self, img1, img2):
-		return 100*( 1 - super(SSIM_LOSS, self).forward(img1, img2))
 	
 class WEIGHTED_SIMILARITY:
 	def __init__(self, primary_loss = "mse", weights = [1.0, 1.0]):

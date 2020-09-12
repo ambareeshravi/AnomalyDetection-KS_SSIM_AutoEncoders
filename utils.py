@@ -59,8 +59,8 @@ def selectModel(model_type):
 	'''
 	model_type = model_type.lower()
 	if "bce" in model_type: loss_function = BCE_LOSS()
-	elif "mssim" in model_type: loss_function = MS_SSIM_LOSS(data_range=1.0, size_average=True, channel=3)
-	elif "sim" in model_type: loss_function = SSIM_LOSS(data_range=1.0, size_average=True, channel=3)
+# 	elif "mssim" in model_type: loss_function = MS_SSIM_LOSS(data_range=1.0, size_average=True, channel=3)
+	elif "sim" in model_type: loss_function = SSIM()
 	elif "weight" in model_type: loss_function = WEIGHTED_SIMILARITY()
 	elif "contractive" in model_type: loss_function = CONTRACTIVE_LOSS()
 	elif "mani" in model_type: loss_function = MANIFOLD_LOSS()
@@ -71,8 +71,8 @@ def selectModel(model_type):
 		elif "kernel" in model_type: return KS_VAE(), VARIATIONAL_LOSS()
 	elif "base" in model_type: return AE(), loss_function
 	elif "q" in model_type: return Qiang_AutoEncoder(), loss_function
-	elif "kernel" in model_type: return KS_AE(), loss_function
-	elif "split" in model_type: return SM_AE_V2(), loss_function
+	elif "kernel" in model_type: return KS_AE(normalDecoder = False), loss_function
+	elif "split" in model_type: return SM_AE_V2(normalDecoder = False), loss_function
 	else: raise TypeError("[ERROR]: Incorrect Model Type")
 
 def selectData(dataset_type = "HAM10000", batch_size = 64):
