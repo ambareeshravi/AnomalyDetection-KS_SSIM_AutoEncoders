@@ -96,13 +96,13 @@ class Trainer:
 	def train(self, model_type,
 			pretrained_model = False,
 			dataset_type = "HAM10000",
-			lr = 1e-4,
-			epochs = 200,
-			batch_size = 32,
+			lr = 2e-4,
+			epochs = 120,
+			batch_size = 64,
 			starting_epoch = 1,
 			version = 1,
-			decayBy = 0.85,
-			decayPer = 20,
+			decayBy = 0.75,
+			decayPer = 75,
 			init_weights = True,
 			debug = True):
 		'''
@@ -202,13 +202,7 @@ if __name__ == "__main__":
 	
 	from test_models import *
 	# Test
-	ts = Tester()
-	for model_path in glob(os.path.join(models_path, "*.tar")):    
-		try:
-			print("Testing:", model_path)
-			ts.test(model_path)
-			print("-"*20)
-		except:
-			pass
+	ts = Tester(dataset_type = args.dataset_type)
+	ts.test(model_path)
 	del ts
 	gc.collect()

@@ -201,13 +201,13 @@ class Trainer:
 			model_list,
 			pretrained_models = False,
 			dataset_type = "HAM10000",
-			lr_list = 1e-3,
-			epochs = 200,
+			lr_list = 2e-4,
+			epochs = 120,
 			batch_size = 64,
 			starting_epoch = 1,
 			version = 1,
 			init_weights = True,
-			decayPer = 25,
+			decayPer = 50,
 			decayBy = 0.75,
 			debug = True):
 		'''
